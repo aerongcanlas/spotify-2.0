@@ -2,8 +2,9 @@ const url = require("url");
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const app = express();
 const axios = require("axios");
+const app = express();
+require('dotenv').config();
 
 /* readfile
 // const fs = require("fs");
@@ -21,8 +22,8 @@ const axios = require("axios");
 // const client_id = process.env.REACT_APP_CLIENT_ID; // use github var for security
 // const client_secret = process.env.REACT_APP_CLIENT_SECRET;
 
-const client_id = "f429068956f4483da0b25e71d29fc805"; // use github var for security
-const client_secret = "045ebe5fdcaf493a90e0806a41b69cf7";
+const client_id = process.env.CLIENT_ID; // use github var for security
+const client_secret = process.env.CLIENT_SECRET;
 const redirect_uri = "http://localhost:3001/";
 
 const generateRandomString = function (length) {
@@ -53,7 +54,7 @@ const scope = [
 ].join(" ");
 
 app.use(cors()).use(cookieParser());
-
+export default 
 app.get("/express_backend", (req, res) => {
    res.send({ express: "YOUR EXPRESS BACKEND IS CONNECTED TO REACT" });
 });

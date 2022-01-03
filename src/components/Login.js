@@ -13,6 +13,11 @@ function Login() {
       .catch((error) => console.log(error))
    }, []);
 
+   const login_fetch = () => {
+      fetch("/login")
+      .then
+   }
+
    // // also keeps running once called 
    // const callBackendAPI = async () => {
    //    const response = await fetch("/express_backend");
@@ -27,7 +32,7 @@ function Login() {
    return (
       <div>
          <h1>Login</h1>
-         <a href="/login" target="_blank">Log In</a>
+         <button onClick={(e) => login_fetch()}>Log In</button>
          <h1>{foo && foo.data}</h1>
       </div>
    );
