@@ -24,7 +24,7 @@ require('dotenv').config();
 
 const client_id = process.env.CLIENT_ID; // use github var for security
 const client_secret = process.env.CLIENT_SECRET;
-const redirect_uri = "http://localhost:3001/";
+const redirect_uri = "http://localhost:3001/callback";
 
 const generateRandomString = function (length) {
    var text = "";
@@ -52,9 +52,8 @@ const scope = [
    "playlist-read-collaborative",
    "streaming",
 ].join(" ");
+app.use(cors({origin: true})).use(cookieParser());
 
-app.use(cors()).use(cookieParser());
-export default 
 app.get("/express_backend", (req, res) => {
    res.send({ express: "YOUR EXPRESS BACKEND IS CONNECTED TO REACT" });
 });
@@ -64,8 +63,9 @@ app.get("/", function (req, res) {
    console.log("Server started.");
 });
 
-app.get("/login", function (req, res) {
+app.get("/login_auth", function (req, res) {
    const state = generateRandomString(16);
+   console.log("Login fetched.");
    res.cookie(stateKey, state);
    const auth_params = {
       client_id: client_id,
@@ -78,7 +78,7 @@ app.get("/login", function (req, res) {
    res.redirect(
       "https://accounts.spotify.com/authorize?" +
          new url.URLSearchParams(auth_params).toString()
-   );
+   )
 });
 
 // get refresh and access tokens
@@ -86,8 +86,9 @@ app.get("/callback", function (req, res) {
    const code = req.query.code || null;
    const state = req.query.state || null;
    const storedState = req.cookies ? req.cookies[stateKey] : null;
-
+   console.log("in callback, code: " + code + "; state: " + state);
    if (state === null || state !== storedState) {
+      console.log("if");
       res.redirect(
          "/#" +
             new url.URLSearchParams({
@@ -112,7 +113,7 @@ app.get("/callback", function (req, res) {
          },
          responseType: "json",
       };
-
+      console.log("else");
       // get access token
       axios(authOptions).then(function (response, error) {
          if (!error && response.status === 200) {
@@ -123,9 +124,9 @@ app.get("/callback", function (req, res) {
                expire_time = response.data.expires_in;
 
             res.send({
-               'access_token': access_token, 
-               'refresh-token': refresh_token, 
-               'expire-time': expire_time
+               access: access_token, 
+               refresh: refresh_token, 
+               expire: expire_time
             })
 
             const auth_options = {
