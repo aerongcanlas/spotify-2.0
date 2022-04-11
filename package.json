@@ -11,16 +11,18 @@
     "concurrently": "^6.5.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "http-proxy-middleware": "^2.0.2",
     "open": "^8.4.0",
     "qs": "^6.10.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
+    "tailwind-scrollbar-hide": "^1.1.7",
     "web-vitals": "^2.1.2"
   },
   "scripts": {
-    "start": "concurrently --names 'SERVER,CLIENT' --prefix-colors 'yellow,blue' --kill-others \"node src/api/Auth.js\" \"react-scripts start\"",
+    "start": "concurrently --names 'SERVER,CLIENT' --prefix-colors 'yellow,blue' --kill-others \"nodemon src/api/Auth.js\" \"react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -46,6 +48,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.1",
     "dotenv": "^10.0.0",
+    "nodemon": "^2.0.15",
     "postcss": "^8.4.5",
     "tailwindcss": "^3.0.8"
   },

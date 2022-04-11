@@ -4,7 +4,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const app = express();
-require('dotenv').config();
+require("dotenv").config();
 
 /* readfile
 // const fs = require("fs");
@@ -24,7 +24,8 @@ require('dotenv').config();
 
 const client_id = process.env.CLIENT_ID; // use github var for security
 const client_secret = process.env.CLIENT_SECRET;
-const redirect_uri = "http://localhost:3001/callback";
+const redirect_uri = process.env.REDIRECT_URI;
+const client_url = process.env.CLIENT_URL;
 
 const generateRandomString = function (length) {
    var text = "";
@@ -52,20 +53,21 @@ const scope = [
    "playlist-read-collaborative",
    "streaming",
 ].join(" ");
-app.use(cors({origin: true})).use(cookieParser());
+app.use(cors()).use(cookieParser());
 
-app.get("/express_backend", (req, res) => {
-   res.send({ express: "YOUR EXPRESS BACKEND IS CONNECTED TO REACT" });
+app.get("/api/backend_test", (req, res) => {
+   res.send({ express: "HATDOG! BACKEND RUNNING!" });
+   console.log("backend test");
 });
 
-// authorize
+// landing
 app.get("/", function (req, res) {
-   console.log("Server started.");
+   console.log("Spotify API backend started.");
 });
 
-app.get("/login_auth", function (req, res) {
+app.get("/api/login_auth", function (req, res) {
    const state = generateRandomString(16);
-   console.log("Login fetched.");
+   console.log("in auth");
    res.cookie(stateKey, state);
    const auth_params = {
       client_id: client_id,
@@ -73,12 +75,15 @@ app.get("/login_auth", function (req, res) {
       redirect_uri: redirect_uri,
       state: state,
       scope: scope,
+      show_dialog: true
    };
 
+   //res.set('Access-Control-Allow-Origin', 'https://accounts.spotify.com');
+   //res.send(new url.URLSearchParams(auth_params).toString());
    res.redirect(
       "https://accounts.spotify.com/authorize?" +
          new url.URLSearchParams(auth_params).toString()
-   )
+   );
 });
 
 // get refresh and access tokens
@@ -86,7 +91,7 @@ app.get("/callback", function (req, res) {
    const code = req.query.code || null;
    const state = req.query.state || null;
    const storedState = req.cookies ? req.cookies[stateKey] : null;
-   console.log("in callback, code: " + code + "; state: " + state);
+
    if (state === null || state !== storedState) {
       console.log("if");
       res.redirect(
@@ -108,26 +113,27 @@ app.get("/callback", function (req, res) {
          headers: {
             Authorization:
                "Basic " +
-               new Buffer.from(client_id + ":" + client_secret).toString("base64"),
+               new Buffer.from(client_id + ":" + client_secret).toString(
+                  "base64"
+               ),
             "content-type": "application/x-www-form-urlencoded",
          },
          responseType: "json",
       };
-      console.log("else");
+
       // get access token
       axios(authOptions).then(function (response, error) {
          if (!error && response.status === 200) {
-            console.log("Access token received!");
 
             const access_token = response.data.access_token,
                refresh_token = response.data.refresh_token,
                expire_time = response.data.expires_in;
 
-            res.send({
-               access: access_token, 
-               refresh: refresh_token, 
-               expire: expire_time
-            })
+            // res.send({
+            //    access: access_token,
+            //    refresh: refresh_token,
+            //    expire: expire_time,
+            // });
 
             const auth_options = {
                url: "https://api.spotify.com/v1/me",
@@ -178,8 +184,8 @@ app.get("/callback", function (req, res) {
             //       song_artists = response.data.artists
             //         .map((artist) => artist.name)
             //         .join(" "),
-            //       available_markets = 
-            //       response.data.album.available_markets.length ? 
+            //       available_markets =
+            //       response.data.album.available_markets.length ?
             //       response.data.album.available_markets.join(", ") : "Not available on Spotify.";
 
             //     console.log(song_name + " by " + song_artists + " ~~~ in: ");
@@ -194,8 +200,13 @@ app.get("/callback", function (req, res) {
             //     );
             // });
             //#endregion
-
-            //res.redirect("http://localhost:3000");
+            //res.send("hatdog");
+            res.redirect(client_url + "/?"+
+                new url.URLSearchParams({
+                  access_token: access_token,
+                  refresh_token: refresh_token,
+                  expires_in: expire_time
+                }).toString());
             // res.redirect(
             //   "/#" +
             //     new url.URLSearchParams({
@@ -205,7 +216,7 @@ app.get("/callback", function (req, res) {
             // );
          } else {
             res.redirect(
-               "/#" +
+               "/?" +
                   new url.URLSearchParams({
                      error: "invalid_token",
                   }).toString()
@@ -253,7 +264,7 @@ app.listen(3001, () => {
 // open("http://localhost:3001", { app: { name: open.apps.chrome } });
 
 // credentials config code
-//#region 
+//#region
 // const credentials_config = {
 //   url: "https://accounts.spotify.com/api/token",
 //   method: "post",
